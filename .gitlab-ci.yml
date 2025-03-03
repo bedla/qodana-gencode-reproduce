@@ -4,6 +4,7 @@ stages:
 
 build-gradle-project:
   image: eclipse-temurin:latest
+  stage: build
 
   script:
     - ./gradlew build
