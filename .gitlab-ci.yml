@@ -33,6 +33,7 @@ qodana-scan:
     QODANA_BRANCH: $CI_COMMIT_REF_NAME
     QODANA_VERSION: "2024.3"
   before_script:
+    - chmod +x ./gradlew
     - ./gradlew generateKotlinSource
   script:
     - qodana --cache-dir=/tmp/.qodana/cache
