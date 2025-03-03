@@ -12,7 +12,7 @@ plugins {
 version = "0.1"
 group = "cz.bedla"
 
-val kotlinVersion = project.properties.get("kotlinVersion")
+val kotlinVersion = project.properties["kotlinVersion"]
 repositories {
     mavenCentral()
 }
