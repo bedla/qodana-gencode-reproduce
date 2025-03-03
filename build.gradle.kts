@@ -100,7 +100,6 @@ tasks.register("generateKotlinSource") {
     }
 }
 
-// Ensure generated sources are included in the compilation
 sourceSets["main"].kotlin.srcDir(tasks.named("generateKotlinSource"))
 
 tasks.named<KotlinCompile>("compileKotlin") {

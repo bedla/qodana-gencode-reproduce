@@ -5,13 +5,10 @@ stages:
 build-gradle-project:
   image: eclipse-temurin:17-jdk
   stage: build
-
   before_script:
     - chmod +x ./gradlew
-
   script:
     - ./gradlew build
-
   artifacts:
     reports:
       junit: '**/build/test-results/**/TEST-*.xml'
