@@ -1,0 +1,64 @@
+stages:
+  - build
+  - scan
+
+build-gradle-project:
+  image: eclipse-temurin:latest
+
+  script:
+    - ./gradlew build
+
+  artifacts:
+    reports:
+      junit: '**/build/test-results/**/TEST-*.xml'
+
+qodana-scan:
+  image:
+    name: jetbrains/qodana-jvm:$QODANA_VERSION
+    entrypoint: [ "" ]
+  stage: scan
+  needs:
+    - job: build-gradle-project
+      artifacts: true
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends jq
+  variables:
+    QODANA_ENDPOINT: "https://qodana.cloud"
+    QODANA_BRANCH: $CI_COMMIT_REF_NAME
+    QODANA_VERSION: "2024.3"
+  script:
+    - baseline_file=$CI_PROJECT_DIR/.qodana/baseline/qodana.sarif.json
+    - jacoco_file=$CI_PROJECT_DIR/target/site/jacoco/jacoco.xml
+    - glCodeQualityReport_file=$CI_PROJECT_DIR/.qodana/results/gl-code-quality-report.json
+    - qodana_scan_exit_code=0
+    - |
+      if [ ! -f $baseline_file ]; then
+        echo "Running Qodana without baseline file"
+        # qodana --coverage-dir=$jacoco_file --save-report --report-dir=$CI_PROJECT_DIR/.qodana/report --results-dir=$CI_PROJECT_DIR/.qodana/results || qodana_scan_exit_code=$?
+        qodana --coverage-dir=$jacoco_file --save-report --report-dir=$CI_PROJECT_DIR/.qodana/report --results-dir=$CI_PROJECT_DIR/.qodana/results --cache-dir=/tmp/.qodana/cache || qodana_scan_exit_code=$?
+      else
+        echo "Running Qodana with baseline file $baseline_file"
+        # qodana --coverage-dir=$jacoco_file --save-report --report-dir=$CI_PROJECT_DIR/.qodana/report --results-dir=$CI_PROJECT_DIR/.qodana/results --baseline $baseline_file || qodana_scan_exit_code=$?
+        qodana --coverage-dir=$jacoco_file --save-report --report-dir=$CI_PROJECT_DIR/.qodana/report --results-dir=$CI_PROJECT_DIR/.qodana/results --cache-dir=/tmp/.qodana/cache --baseline $baseline_file || qodana_scan_exit_code=$?
+      fi
+    - echo "Qodana exit-code=$qodana_scan_exit_code"
+#     Fix bug for empty Gitlab Quality code report JSON file when no change detected, see https://youtrack.jetbrains.com/issue/QD-10038/Qodana-JVM-Gitlab-Code-Quality-result-JSON-is-null-when-baseline-and-results-dir-used
+    - glCodeQualityReportJSON=$(jq 'if (. | type  == "null") then [] else . end' $glCodeQualityReport_file)
+    - echo $glCodeQualityReportJSON > $glCodeQualityReport_file
+    - |
+      echo "qodana_scan_exit_code=$qodana_scan_exit_code" >> qodana_scan_exit_code.env
+      if [ $qodana_scan_exit_code -eq 255 ]; then
+        echo "***"
+        echo " "
+        echo "Qodana scan FAILED with exit-code=$qodana_scan_exit_code (saving value to .env for later use)"
+        echo " "
+        echo "***"
+        exit 0
+      else
+        if [ $qodana_scan_exit_code -eq 0 ]; then
+          echo "Qodana scan SUCCEED"
+        else
+          echo "Qodana scan FAILED (see logs for details)"
+        fi
+        exit $qodana_scan_exit_code
+      fi
