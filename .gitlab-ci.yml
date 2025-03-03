@@ -3,8 +3,11 @@ stages:
   - scan
 
 build-gradle-project:
-  image: eclipse-temurin:latest
+  image: eclipse-temurin:17-jdk
   stage: build
+
+  before_script:
+    - chmod +x ./gradlew
 
   script:
     - ./gradlew build
