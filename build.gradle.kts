@@ -95,15 +95,17 @@ tasks.register("generateKotlinSource") {
     }
 }
 
-sourceSets["main"].java.srcDir(tasks.named("generateKotlinSource"))
+// Variant A
+//sourceSets["main"].java.srcDir(tasks.named("generateKotlinSource"))
 
-//sourceSets {
-//    main {
-//        java {
-//            srcDirs(tasks.named("generateKotlinSource"))
-//        }
-//    }
-//}
+// Variant B
+sourceSets {
+    main {
+        java {
+            srcDirs(tasks.named("generateKotlinSource"))
+        }
+    }
+}
 
 tasks.named<KotlinCompile>("compileKotlin") {
     dependsOn("generateKotlinSource")
