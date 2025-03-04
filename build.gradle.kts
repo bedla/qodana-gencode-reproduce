@@ -72,8 +72,8 @@ tasks.register("generateKotlinSource") {
 
             import io.micronaut.http.annotation.Controller
             import io.micronaut.http.annotation.Get
-            import javax.annotation.processing.Generated
-            //import javax.annotation.Generated
+            //import javax.annotation.processing.Generated
+            import javax.annotation.Generated
 
             @Controller
             @Generated
