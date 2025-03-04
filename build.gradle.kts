@@ -94,10 +94,6 @@ tasks.register("generateKotlinSource") {
     }
 }
 
-// Variant A
-//sourceSets["main"].java.srcDir(tasks.named("generateKotlinSource"))
-
-// Variant B
 sourceSets {
     main {
         java {
