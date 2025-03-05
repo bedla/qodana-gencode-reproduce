@@ -3,5 +3,6 @@ version: 1.0
 profile:
   name: qodana.recommended
 
+# When Micronaut plugin is not installed, then "Unused symbol" Qodana issue is returned for @Singleton classes called from @Controller
 plugins:
   - id: com.intellij.micronaut
