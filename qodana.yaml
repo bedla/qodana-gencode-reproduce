@@ -2,3 +2,6 @@ version: 1.0
 
 profile:
   name: qodana.recommended
+
+plugins:
+  - id: com.intellij.micronaut
